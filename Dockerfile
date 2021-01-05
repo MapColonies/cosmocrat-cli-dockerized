@@ -1,6 +1,7 @@
 FROM python:3.6-alpine3.12
-ENV COSMOCRATOR_VERSION=0.0.2
-ENV OSMOSIS_VERSION=0.48.2
+ARG COSMOCRATOR_VERSION=0.0.2
+ARG OSMOSIS_VERSION=0.48.2
+ENV workdir /app
 
 RUN apk update -q --no-cache \
     && apk add -q --no-cache \
@@ -25,20 +26,22 @@ RUN set -x \
   && rm -f osmosis-$OSMOSIS_VERSION.tgz \
   && ln -s /opt/osmosis/bin/osmosis /usr/bin/osmosis
 
+WORKDIR $workdir
+COPY ./resources .
+
 # osmupdate
 RUN mkdir -p /opt/osmupdate \
   && cd /opt/osmupdate \
-  && wget -O - http://m.m.i24.cc/osmupdate.c | cc -x c - -o osmupdate \
+  && cat $workdir/osmupdate.c | cc -x c - -o osmupdate \
   && ln -s /opt/osmupdate/osmupdate /usr/bin/osmupdate
 
 # osmconvert
 RUN mkdir -p /opt/osmconvert \
   && cd /opt/osmconvert \
-  && wget -O - http://m.m.i24.cc/osmconvert.c | cc -x c - -lz -O3 -o osmconvert \
+  && cat $workdir/osmconvert.c | cc -x c - -lz -O3 -o osmconvert \
   && ln -s /opt/osmconvert/osmconvert /usr/bin/osmconvert
-
-WORKDIR /app
 
 # from pypi:
 RUN pip3 install cosmocrat-cli==$COSMOCRATOR_VERSION
-CMD ["cosmocrat", "-h"]
+CMD ["-h"]
+ENTRYPOINT ["cosmocrat"]
