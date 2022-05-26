@@ -1,4 +1,4 @@
-FROM python:3.6-alpine3.12
+FROM python:3.10.0b2-alpine3.12
 ARG COSMOCRATOR_VERSION=0.0.2
 ARG OSMOSIS_VERSION=0.48.2
 ENV workdir /app
